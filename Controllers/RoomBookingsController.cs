@@ -18,11 +18,25 @@ namespace ManajemenRuangan.Controllers
 
         // GET: api/bookings
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] string? room,
+            [FromQuery] string? borrower,
+            [FromQuery] BookingStatus? status)
         {
-            var data = await _context.RoomBookings.ToListAsync();
-            return Ok(data);
+            var query = _context.RoomBookings.AsQueryable();
+
+            if (!string.IsNullOrEmpty(room))
+                query = query.Where(b => b.RoomName.Contains(room));
+
+            if (!string.IsNullOrEmpty(borrower))
+                query = query.Where(b => b.BorrowerName.Contains(borrower));
+
+            if (status != null)
+                query = query.Where(b => b.Status == status);
+
+            return Ok(await query.ToListAsync());
         }
+
 
         // GET: api/bookings/{id}
         [HttpGet("{id}")]
@@ -80,7 +94,7 @@ namespace ManajemenRuangan.Controllers
 
         //PUT api/bookings/{id}/status
         [HttpPut("{id}/status")]
-        public async Task<IActionResult>UpdateStatus(int id, [FromBody] BookingStatus status)
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] BookingStatus status)
         {
             var booking = await _context.RoomBookings.FindAsync(id);
             if (booking == null)
