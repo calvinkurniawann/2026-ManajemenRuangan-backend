@@ -10,6 +10,7 @@ namespace ManajemenRuangan.Data
         }
 
         public DbSet<RoomBooking> RoomBookings { get; set; }
+        public DbSet<Room> Rooms { get; set; }
     }
 }
 
