@@ -1,13 +1,23 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ManajemenRuangan.Models
 {
     public class RoomBooking
     {
         public int Id { get; set; }
-        public string RoomName { get; set; } = "";
-        public string BorrowerName { get; set; } = "";
-        public DateTime Date { get; set; }
-        public string Purpose { get; set; } = "";
-        public string Status { get; set; } = "Pending";
 
+        [Required]
+        public string RoomName { get; set; } = "";
+
+        [Required]
+        public string BorrowerName { get; set; } = "";
+
+        [Required]
+        public DateTime Date { get; set; }
+
+        [Required]
+        public string Purpose { get; set; } = "";
+
+        public BookingStatus Status { get; set; } = BookingStatus.Pending;
     }
 }
