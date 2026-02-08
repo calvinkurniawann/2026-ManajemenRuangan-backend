@@ -23,19 +23,24 @@ namespace ManajemenRuangan.Controllers
             [FromQuery] string? borrower,
             [FromQuery] BookingStatus? status)
         {
-            var query = _context.RoomBookings.AsQueryable();
+            var query = _context.RoomBookings
+                .Include(b => b.Room)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(room))
-                query = query.Where(b => b.RoomName.Contains(room));
+                query = query.Where(b => b.Room.Name.Contains(room));
 
             if (!string.IsNullOrEmpty(borrower))
                 query = query.Where(b => b.BorrowerName.Contains(borrower));
 
-            if (status != null)
-                query = query.Where(b => b.Status == status);
+            if (status.HasValue)
+                query = query.Where(b => b.Status == status.Value);
 
-            return Ok(await query.ToListAsync());
+            var result = await query.ToListAsync();
+
+            return Ok(result);
         }
+
 
 
         // GET: api/bookings/{id}
@@ -70,25 +75,35 @@ namespace ManajemenRuangan.Controllers
         {
             var booking = await _context.RoomBookings.FindAsync(id);
             if (booking == null)
-            {
                 return NotFound();
-            }
 
             if (booking.Status != BookingStatus.Pending)
             {
-                return BadRequest(new { Message = "Tidak bisa mengubah data yang sudah diproses" });
+                return BadRequest(new
+                {
+                    Message = "Tidak bisa mengubah data yang sudah diproses"
+                });
             }
 
-            booking.RoomName = updated.RoomName;
+            var roomExists = await _context.Rooms.AnyAsync(r => r.id == updated.RoomId);
+            if (!roomExists)
+            {
+                return BadRequest(new
+                {
+                    Message = "Room tidak ditemukan"
+                });
+            }
+
+            booking.RoomId = updated.RoomId;
             booking.BorrowerName = updated.BorrowerName;
             booking.Date = updated.Date;
             booking.Purpose = updated.Purpose;
-            booking.Status = updated.Status;
 
             await _context.SaveChangesAsync();
 
             return Ok(booking);
         }
+
 
 
 

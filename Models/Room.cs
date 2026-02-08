@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ManajemenRuangan.Models
 {
@@ -7,9 +8,12 @@ namespace ManajemenRuangan.Models
         public int id { get; set; }
 
         [Required]
-        public string Name { get; set; } = "";
+        public string Name { get; set; } = null!;
 
-        [Required]
-        public string Location { get; set; } = "";
+        public string? Location { get; set; }
+
+        [JsonIgnore]
+        public ICollection<RoomBooking> RoomBookings { get; set; } = new List<RoomBooking>();
     }
+
 }
