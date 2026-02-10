@@ -15,6 +15,9 @@ namespace ManajemenRuangan.Data
                 .HasForeignKey(rb => rb.RoomId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<RoomBooking>()
+                .HasQueryFilter(b => !b.IsDeleted);
+
             modelBuilder.Entity<Room>().HasData(
                 new Room
                 {
