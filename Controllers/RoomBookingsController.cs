@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ManajemenRuangan.Data;
 using ManajemenRuangan.Models;
+using ManajemenRuangan.DTOs.RoomBookings;
 
 namespace ManajemenRuangan.Controllers
 {
@@ -36,7 +37,17 @@ namespace ManajemenRuangan.Controllers
             if (status.HasValue)
                 query = query.Where(b => b.Status == status.Value);
 
-            var result = await query.ToListAsync();
+            var result = await query
+                .Select(b => new RoomBookingResponseDto
+                {
+                    id = b.Id,
+                    RoomName = b.Room.Name,
+                    BorrowerName = b.BorrowerName,
+                    Date = b.Date,
+                    Purpose = b.Purpose,
+                    Status = b.Status
+                })
+                .ToListAsync();
 
             return Ok(result);
         }
@@ -47,7 +58,19 @@ namespace ManajemenRuangan.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var booking = await _context.RoomBookings.FindAsync(id);
+            var booking = await _context.RoomBookings
+                .Include(b => b.Room)
+                .Where(b => b.Id == id)
+                .Select(b => new RoomBookingResponseDto
+                {
+                    id = b.Id,
+                    RoomName = b.Room.Name,
+                    BorrowerName = b.BorrowerName,
+                    Date = b.Date,
+                    Purpose = b.Purpose,
+                    Status = b.Status
+                })
+                .FirstOrDefaultAsync();
             if (booking == null)
             {
                 return NotFound(new { Message = "Data tidak ditemukan" });
@@ -59,9 +82,20 @@ namespace ManajemenRuangan.Controllers
 
         // POST: api/bookings
         [HttpPost]
-        public async Task<IActionResult> Create(RoomBooking booking)
+        public async Task<IActionResult> Create(RoomBookingCreateDto dto)
         {
-            booking.Status = BookingStatus.Pending;
+            var roomExists = await _context.Rooms.AnyAsync(r => r.id == dto.RoomId);
+            if (!roomExists)
+                return BadRequest(new { Message = "Room tidak ditemukan" });
+
+            var booking = new RoomBooking
+            {
+                RoomId = dto.RoomId,
+                BorrowerName = dto.BorrowerName,
+                Date = dto.Date,
+                Purpose = dto.Purpose,
+                Status = BookingStatus.Pending
+            };
 
             _context.RoomBookings.Add(booking);
             await _context.SaveChangesAsync();
@@ -71,7 +105,7 @@ namespace ManajemenRuangan.Controllers
 
         // PUT: api/bookings/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, RoomBooking updated)
+        public async Task<IActionResult> Update(int id, RoomBookingUpdateDto dto)
         {
             var booking = await _context.RoomBookings.FindAsync(id);
             if (booking == null)
@@ -85,7 +119,7 @@ namespace ManajemenRuangan.Controllers
                 });
             }
 
-            var roomExists = await _context.Rooms.AnyAsync(r => r.id == updated.RoomId);
+            var roomExists = await _context.Rooms.AnyAsync(r => r.id == dto.RoomId);
             if (!roomExists)
             {
                 return BadRequest(new
@@ -94,10 +128,10 @@ namespace ManajemenRuangan.Controllers
                 });
             }
 
-            booking.RoomId = updated.RoomId;
-            booking.BorrowerName = updated.BorrowerName;
-            booking.Date = updated.Date;
-            booking.Purpose = updated.Purpose;
+            booking.RoomId = dto.RoomId;
+            booking.BorrowerName = dto.BorrowerName;
+            booking.Date = dto.Date;
+            booking.Purpose = dto.Purpose;
 
             await _context.SaveChangesAsync();
 

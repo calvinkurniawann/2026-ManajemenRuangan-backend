@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ManajemenRuangan.Data;
 using ManajemenRuangan.Models;
+using ManajemenRuangan.DTOs.Rooms;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,48 +19,44 @@ public class RoomsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var rooms = await _context.Rooms.ToListAsync();
+        var rooms = await _context.Rooms
+            .Select(r => new RoomResponseDto
+            {
+                id = r.id,
+                Name = r.Name,
+                Location = r.Location
+            })
+            .ToListAsync();
+        
         return Ok(rooms);
-    }
-
-    // GET: api/rooms/{id}
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var room = await _context.Rooms.FindAsync(id);
-        if (room == null)
-        {
-            return NotFound(new { Message = "Data tidak ditemukan" });
-        }
-        return Ok(room);
     }
 
     // POST: api/rooms
     [HttpPost]
-    public async Task<IActionResult> Create(Room room)
+    public async Task<IActionResult> Create(RoomCreateDto dto)
     {
-        if (!ModelState.IsValid)
+        var room = new Room
         {
-            return BadRequest(ModelState);
-        }
+            Name = dto.Name,
+            Location = dto.Location
+        };
 
         _context.Rooms.Add(room);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = room.id }, room);
+        return CreatedAtAction(nameof(GetAll), new { id = room.id }, room);
     }
 
     // PUT: api/rooms/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Room room)
+    public async Task<IActionResult> Update(int id, RoomUpdateDto dto)
     {
-        if (id != room.id)
-        {
-            return BadRequest(new { Message = "ID tidak sesuai" });
-        }
+        var room = await _context.Rooms.FindAsync(id);
+        if (room == null) return NotFound();
 
-        _context.Entry(room).State = EntityState.Modified;
+        room.Name = dto.Name;
+        room.Location = dto.Location;
+
         await _context.SaveChangesAsync();
-
         return Ok(room);
     }
 
