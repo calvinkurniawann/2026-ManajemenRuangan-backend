@@ -23,5 +23,7 @@ namespace ManajemenRuangan.Models
                 public string Purpose { get; set; } = "";
 
                 public BookingStatus Status { get; set; } = BookingStatus.Pending;
+
+                public bool IsDeleted { get; set; } = false;
         }
 }

@@ -167,7 +167,7 @@ namespace ManajemenRuangan.Controllers
                 return NotFound();
             }
 
-            _context.RoomBookings.Remove(booking);
+            booking.IsDeleted = true;
             await _context.SaveChangesAsync();
 
             return NoContent();
