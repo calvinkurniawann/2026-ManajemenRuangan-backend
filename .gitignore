@@ -2,5 +2,5 @@ bin/
 obj/
 *.db
 .env
-.db-shm
-.db-wal
+*.db-shm
+*.db-wal
