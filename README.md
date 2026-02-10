@@ -20,7 +20,7 @@ Backend dikembangkan menggunakan ASP.NET Core Web API.
 ## Instalasi
 
 1. Clone Repository
-git clone https://github.com/<username>/2026-ManajemenRuangan-backend.git
+git clone https:/calvinkurniawann/github.com/<username>/2026-ManajemenRuangan-backend.git
 cd 2026-ManajemenRuangan-backend
 
 2. Restore Dependency
