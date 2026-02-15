@@ -87,6 +87,21 @@ namespace ManajemenRuangan.Controllers
             var roomExists = await _context.Rooms.AnyAsync(r => r.id == dto.RoomId);
             if (!roomExists)
                 return BadRequest(new { Message = "Room tidak ditemukan" });
+            
+            var isConflict = await _context.RoomBookings
+            .AnyAsync(b =>
+                b.RoomId == dto.RoomId &&
+                b.Date.Date == dto.Date.Date &&
+                b.Status == BookingStatus.Approved
+            );
+
+            if (isConflict)
+            {
+                return BadRequest(new
+                {
+                    Message = "Ruangan sudah dibooking dan disetujui pada tanggal tersebut"
+                });
+            }
 
             var booking = new RoomBooking
             {
@@ -116,6 +131,21 @@ namespace ManajemenRuangan.Controllers
                 return BadRequest(new
                 {
                     Message = "Tidak bisa mengubah data yang sudah diproses"
+                });
+            }
+
+            var isConflict = await _context.RoomBookings
+            .AnyAsync(b =>
+                b.RoomId == dto.RoomId &&
+                b.Date.Date == dto.Date.Date &&
+                b.Status == BookingStatus.Approved
+            );
+
+            if (isConflict)
+            {
+                return BadRequest(new
+                {
+                    Message = "Ruangan sudah dibooking dan disetujui pada tanggal tersebut"
                 });
             }
 
