@@ -5,7 +5,16 @@ The format is based on [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.0.0] - 2026-02-XX
+## [1.0.1] - 2026-02-15
+### Added
+- Booking date conflict validation
+- Enable CORS for frontend integration
+
+## [1.0.1] - 2026-02-12
+### Added
+- Enable CORS for frontend integration
+
+## [1.0.0] - 2026-02-10
 ### Added
 - Initial backend release
 - Room master CRUD
