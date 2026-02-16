@@ -87,7 +87,7 @@ namespace ManajemenRuangan.Controllers
             var roomExists = await _context.Rooms.AnyAsync(r => r.id == dto.RoomId);
             if (!roomExists)
                 return BadRequest(new { Message = "Room tidak ditemukan" });
-            
+
             var isConflict = await _context.RoomBookings
             .AnyAsync(b =>
                 b.RoomId == dto.RoomId &&
@@ -136,6 +136,7 @@ namespace ManajemenRuangan.Controllers
 
             var isConflict = await _context.RoomBookings
             .AnyAsync(b =>
+                b.Id != id &&
                 b.RoomId == dto.RoomId &&
                 b.Date.Date == dto.Date.Date &&
                 b.Status == BookingStatus.Approved
